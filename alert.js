@@ -16,8 +16,8 @@ Similarly we can remove the "ALERT DATA-API" section and use $(".alert").alert()
 **********************************/
 
 +function ($) {
-// sans le "+", cela serait une "function déclaration" et non une "function expression". On pourrait aussi utiliser des parenthèses pour entourer le tout.
-// Ainsi on peut faire une self invoking function expression (noter les parenthèse à la fin du fichier). Une "function declaration" ne peut pas être self-invoquée (surement à cause de l'hoisting qui ferait que la fonction serait éxécutée en début d'execution et non à l'endroit voulu)
+// Without the "+", this would be a "Function Declaration" and not a "Function Expression". A more common way of doing this is surrounding the whole function with parenthesis.
+// Why do we need a "Function Expression" here? Because we want to make a self-invoking (or immediately invoked) function here (see that "(jQuery)" at the end of the file?). And a "Function Declaration" cannot be self-invoked (because of the hoisting, which would make the function execute at the beginning, not at it's right place. See "Javascript hoisting" for more precision).
   'use strict';
 
   // ALERT CLASS DEFINITION
@@ -51,8 +51,7 @@ Similarly we can remove the "ALERT DATA-API" section and use $(".alert").alert()
     var $parent = $(selector)
     // read carefully : selector was only a string. Now $parent is the targeted element.
 
-    //if (e) e.preventDefault()
-    e.preventDefault()
+    if (e) e.preventDefault()
     // we test "if (e)" because we can call the method directly in our js, witout event listener, so the method can be called without passing in an event
 
     if (!$parent.length) { // if nothing is selected, $parent has no element inside
@@ -60,7 +59,7 @@ Similarly we can remove the "ALERT DATA-API" section and use $(".alert").alert()
     }
 
     $parent.trigger(e = $.Event('close.bs.alert'))
-    // We trigger an event that we name 'close.bs.alert'
+    // We trigger an event that we name 'close.bs.alert'. So we can catch this event in our main JS file (with the .on method) to do stuff before it closes.
     // Nota : Careful : here we change the value of e ! So don't be surprised if e.isDefaultPrevented() returns false (even if we see e.preventDefault() few lines before)
     // why do we override the value of e? to have a unique event namespace, whatever the method used (data API or manually in JS), I guess
     // why do we trigger this? This is a hook. We can hook on this event in our main JS. 
@@ -77,7 +76,7 @@ Similarly we can remove the "ALERT DATA-API" section and use $(".alert").alert()
     function removeElement() {
       // detach from parent, fire event then clean up data
       $parent.detach().trigger('closed.bs.alert').remove()
-      // here we trigger an event "closed.bs.alert" (so we can hook on this event to do stuffs after it has close). Of course if we didn't previously set an event with that name (using the .on method) in our main .js, the event doesn't exist and the trigger has no effect. This causes no error. 
+      // We trigger an event that we name 'closed.bs.alert'. So we can catch this event in our main JS file (with the .on method) to do stuff after it closed.
       // Usage : 
       // $('.alert').on('closed.bs.alert', function () {
       //   console.log("The alert has been closed! Bye!");  
@@ -138,7 +137,7 @@ Similarly we can remove the "ALERT DATA-API" section and use $(".alert").alert()
 
   // ALERT DATA-API
   // ==============
-//  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
+  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
   /* Nota : first argument of the jQuery "on" method accepts namespaces that simplify removing or triggering the event. (chain them like css classes). Here we define 3 namespaces which are bs, alert and data-api. We can now remove the click event handler like this :
   - $(document).off("click") removes all click events binded on document which seems a bit overkilling...
   - $(document).off("click.bs.alert") removes click events which have been attached with the namespace bs.alert
